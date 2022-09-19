@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
 
 struct Product{
 char name[50],code[30];
@@ -35,13 +35,83 @@ return price+price*((float)15/(float)100);}
 
 char productcode[30];
 int productquantity;
+
 void buyproduct(){
     for(i=0;i<index;i++){
         int comparecode=strcmp(p[i].code,productcode);
         if(comparecode==0){
             p[i].quantity-=productquantity;
+            /*time_t dateV ;
+            dateV = time(NULL);
+            printf("date : %s\n",ctime(&dateV));*/
         }
     }
+}
+int codeorquantity;
+void searchproduct(){
+    printf("1- enter the code of product.\n");
+    printf("2- enter the quantity of product.\n ");
+    scanf("%d",&codeorquantity);
+    if(codeorquantity==1){
+        printf("enter the code: ");
+        scanf("%s",&productcode);
+        for(i=0;i<index;i++){
+                int comparecode=strcmp(p[i].code,productcode);
+                if(comparecode==0){
+                     printf("name: %s                 ",p[i].name);
+                     printf("price: %.2f                 ",p[i].price);
+                     printf("price TTC: %.2f                 ",priceTTC(p[i].price));
+                     printf("quantity: %d                 ",p[i].quantity);
+                     printf("code: %s                 \n\n",p[i].code);
+                }
+    }
+    }else if(codeorquantity==2){
+        printf("enter the quantity: ");
+        scanf("%d",&productquantity);
+           for(i=0;i<index;i++){
+                 if(productquantity==p[i].quantity){
+                     printf("name: %s                 ",p[i].name);
+                     printf("price: %.2f                 ",p[i].price);
+                     printf("price TTC: %.2f                 ",priceTTC(p[i].price));
+                     printf("quantity: %d                 ",p[i].quantity);
+                     printf("code: %s                 \n\n",p[i].code);
+
+                }
+    }
+    }
+}
+
+int exist=0;
+void stockstatus(){
+         printf("\nthe products their quantity less than 3 are: \n");
+         for(i=0;i<index;i++){
+                if(p[i].quantity<3){
+                     printf("name: %s                 ",p[i].name);
+                     printf("price: %.2f                 ",p[i].price);
+                     printf("price TTC: %.2f                 ",priceTTC(p[i].price));
+                     printf("quantity: %d                 ",p[i].quantity);
+                     printf("code: %s                 \n\n",p[i].code);
+                     exist++;
+                }
+          if(exist==0){
+            printf(" 0. ");
+          }else{}
+    }
+}
+
+void supplystock(){
+    printf("enter the code of product: ");
+    scanf("%s",productcode);
+    printf("enter the quantity:  ");
+    scanf("%d",&productquantity);
+      for(i=0;i<index;i++){
+        int comparecode=strcmp(p[i].code,productcode);
+        if(comparecode==0){
+            p[i].quantity=p[i].quantity+productquantity;
+
+        }
+    }
+
 }
 int main()
 {
@@ -105,12 +175,12 @@ int main()
                     }
                 for(i=0;i<index;i++){
 
-                        printf("%s                 ",p[i].name);
-                        printf("%.2f                 ",p[i].price);
-                        printf("%.2f                 \n",priceTTC(p[i].price));
+                        printf("name: %s                 ",p[i].name);
+                        printf("price: %.2f                 ",p[i].price);
+                        printf("price TTC: %.2f                 \n",priceTTC(p[i].price));
                     }
                 break;
-            case 4:
+            case 4://not complaited
 
                 printf("enter the code of product: ");
                 scanf("%s",productcode);
@@ -119,10 +189,13 @@ int main()
                 buyproduct();
                 break;
             case 5:
+                searchproduct();
                 break;
             case 6:
+                stockstatus();
                 break;
             case 7:
+                supplystock();
                 break;
             case 8:
                 break;
