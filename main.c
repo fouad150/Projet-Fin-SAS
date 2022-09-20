@@ -12,15 +12,20 @@ struct Product p[10000];
 
 struct Statistics{
     time_t date;
-    float price TTC;
+    float priceTTC;
     float total_priceTTC;
-    float total_prices;
 };
 struct Statistics st[10000];
+float total_prices=0;
+float average_price;
+int sold_products;
 
 int i,j,products;
 int choice,index=0;
 int order;
+
+float priceTTC(float price){
+return price+price*((float)15/(float)100);}
 
 void addproduct(){
     for(i=0;i<products;i++){
@@ -38,12 +43,13 @@ void addproduct(){
 
 }
 
-float priceTTC(float price){
+float price_TTC(float price){
 return price+price*((float)15/(float)100);}
 
 char productcode[30];
 int productquantity;
 int sale_index=0;
+
 void buyproduct(){
     for(i=0;i<index;i++){
         int comparecode=strcmp(p[i].code,productcode);
@@ -53,8 +59,13 @@ void buyproduct(){
             saledate=time(NULL);
             st[sale_index].date=saledate;
             //printf("date : %s\n",ctime(&st[sale_index].date));
-            st[sale_index].priceTTC=
+            st[sale_index].priceTTC=price_TTC(p[i].price);
+            st[sale_index].total_priceTTC=productquantity*price_TTC(p[i].price);
+            total_prices+=st[sale_index].total_priceTTC;
+            sold_products+=productquantity;
+            average_price=total_prices/sold_products;
             sale_index++;
+
 
         }
     }
@@ -100,7 +111,7 @@ void stockstatus(){
                 if(p[i].quantity<3){
                      printf("name: %s                 ",p[i].name);
                      printf("price: %.2f                 ",p[i].price);
-                     printf("price TTC: %.2f                 ",priceTTC(p[i].price));
+                     printf("price TTC: %.2f                 ",price_TTC(p[i].price));
                      printf("quantity: %d                 ",p[i].quantity);
                      printf("code: %s                 \n\n",p[i].code);
                      exist++;
@@ -147,16 +158,32 @@ void deleteproduct(){
     }else{printf("there is no product has this code.");}
 }
 
+float max=0;
+
 void sales_statistics(){
-    printf("the total prices of the sold products today: \n");
-    printf("the average price of the sold products: \n");
-    printf("the max price of the sold products: \n");
-    printf("the min price of the sold products: \n");
+    printf("the total prices of the sold products today: %.2f\n",total_prices);
+    printf("the average price of the sold products: %.2f\n",average_price);
+    printf("the max price of the sold products: ");
+    for(i=0;i<sale_index;i++){
+        if(st[i].priceTTC>max){
+            max=st[i].priceTTC;
+        }
+    }
+    printf("%.2f\n",max);
+    float min=max;
+    printf("the min price of the sold products: ");
+      for(i=0;i>=0&&i<sale_index;i++){
+        if(st[i].priceTTC<min){
+            min=st[i].priceTTC;
+        }
+    }
+    printf("%.2f",min);
 }
+
 int main()
 {
 
-    printf("            |---{PHARMACY MANAGEMENT}---|\n\n");
+    printf("\n\n            |---PHARMACY MANAGEMENT---|\n\n");
 
     do{
         printf("\n                   [--MENU--]\n\n");
@@ -217,7 +244,7 @@ int main()
 
                         printf("name: %s                 ",p[i].name);
                         printf("price: %.2f                 ",p[i].price);
-                        printf("price TTC: %.2f                 \n",priceTTC(p[i].price));
+                        printf("price TTC: %.2f                 \n",price_TTC(p[i].price));
                     }
                 break;
             case 4://not complaited
@@ -241,6 +268,7 @@ int main()
                 deleteproduct();
                 break;
             case 9:
+                sales_statistics();
                 break;
         }
 
