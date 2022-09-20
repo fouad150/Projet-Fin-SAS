@@ -4,11 +4,19 @@
 #include <time.h>
 
 struct Product{
-char name[50],code[30];
-float price;
-int quantity;
+    char name[50],code[30];
+    float price;
+    int quantity;
   };
 struct Product p[10000];
+
+struct Statistics{
+    time_t date;
+    float price TTC;
+    float total_priceTTC;
+    float total_prices;
+};
+struct Statistics st[10000];
 
 int i,j,products;
 int choice,index=0;
@@ -35,15 +43,19 @@ return price+price*((float)15/(float)100);}
 
 char productcode[30];
 int productquantity;
-
+int sale_index=0;
 void buyproduct(){
     for(i=0;i<index;i++){
         int comparecode=strcmp(p[i].code,productcode);
         if(comparecode==0){
             p[i].quantity-=productquantity;
-            /*time_t dateV ;
-            dateV = time(NULL);
-            printf("date : %s\n",ctime(&dateV));*/
+            time_t saledate ;
+            saledate=time(NULL);
+            st[sale_index].date=saledate;
+            //printf("date : %s\n",ctime(&st[sale_index].date));
+            st[sale_index].priceTTC=
+            sale_index++;
+
         }
     }
 }
@@ -112,6 +124,34 @@ void supplystock(){
         }
     }
 
+}
+
+void deleteproduct(){
+    printf("enter the code of product: ");
+    scanf("%s",productcode);
+      for(i=0;i<index-1;i++){
+        int comparecode=strcmp(p[i].code,productcode);
+        if(comparecode==0){
+            while (i<index-1){
+                    p[i].quantity=p[i+1].quantity;
+                    }
+            index--;
+            }
+
+
+    }
+    int comparecode=strcmp(p[index-1].code,productcode);
+    if(comparecode==0){
+            index--;
+
+    }else{printf("there is no product has this code.");}
+}
+
+void sales_statistics(){
+    printf("the total prices of the sold products today: \n");
+    printf("the average price of the sold products: \n");
+    printf("the max price of the sold products: \n");
+    printf("the min price of the sold products: \n");
 }
 int main()
 {
@@ -198,6 +238,7 @@ int main()
                 supplystock();
                 break;
             case 8:
+                deleteproduct();
                 break;
             case 9:
                 break;
