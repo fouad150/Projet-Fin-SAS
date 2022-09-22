@@ -13,7 +13,7 @@ struct Product p[10000];
 struct Statistics{
     time_t date;
     float priceTTC;
-    float total_priceTTC;
+    float total_priceTTC;//user quantity * priceTTC
 };
 struct Statistics st[10000];
 float total_prices=0;
@@ -24,58 +24,144 @@ int i,j,products;
 int choice,index=0;
 int order;
 
-float priceTTC(float price){
-return price+price*((float)15/(float)100);}
-
-void addproduct(){
-    for(i=0;i<products;i++){
-                printf("\nproduct(%d) information :\n",index+1);
-                printf("enter the name of product: ");
-                scanf("%s",&p[index].name);
-                printf("enter the price of product: ");
-                scanf("%f",&p[index].price);
-                printf("enter the quantity of product: ");
-                scanf("%d",&p[index].quantity);
-                printf("enter the code of product: ");
-                scanf("%s",&p[index].code);
-                index++;
-                }
-
-}
-
 float price_TTC(float price){
 return price+price*((float)15/(float)100);}
 
-char productcode[30];
-int productquantity;
+void add_oneproduct(){
+                int samecode=0;//check if the code was repeated
+                printf("\nproduct(%d) information :\n",index+1);
+                printf("enter the name of product: ");
+                scanf("%s",&p[index].name);
+                printf("enter the price: ");
+                scanf("%f",&p[index].price);
+                if(p[index].price<=0){//if negative price
+                       printf("\nthe price must be positive,try again.\n");
+                       add_oneproduct();//there is another solution (goto)
+                }else {
+                    printf("enter the quantity: ");
+                    scanf("%d",&p[index].quantity);
+                    if(p[index].quantity<=0){//if negative quantity
+                         printf("\nthe quantity must be positive,try again.\n");
+                         add_oneproduct();
+
+                    }else {
+
+                        printf("enter the code: ");
+                        scanf("%s",&p[index].code);
+                        for(j=0;j<index;j++){
+                            if(strcmp(p[index].code,p[j].code)==0){
+                                  samecode++;
+                            }
+
+                        }
+                       if(samecode==0){
+                          index++;
+                       }else{
+                           printf("this code is already existed,try another code.\n");
+                           add_oneproduct();
+                       }
+                    }
+                }
+}
+
+void add_severalproducts(){
+    for(i=0;i<products;i++){
+        add_oneproduct();
+    }
+}
+
+void sortproducts(){
+        printf("\n1-sort the list of products in ascending alphabetical order of name.\n");
+        printf("2-sort the list of products in descending order of price.\n");
+        scanf("%d",&order);
+        if(order==1){
+            for(i=0;i<index;i++){
+                for(j=0;j<index-1;j++){
+                    int compare=strcmp(p[j].name,p[j+1].name);
+                    if(compare>0){
+                        struct Product T=p[j];
+                        p[j]=p[j+1];
+                        p[j+1]=T;
+                    }
+              }
+        }
+
+    }else if(order==2){
+            for(i=0;i<index;i++){
+                for(j=0;j<index-1;j++){
+
+                    if(p[j].price<p[j+1].price){
+                        struct Product T=p[j];
+                        p[j]=p[j+1];
+                        p[j+1]=T;
+                    }
+
+                }
+            }
+        }
+        for(i=0;i<index;i++){
+                printf("name: %s           ",p[i].name);
+                printf("price: %.2f           ",p[i].price);
+                printf("price TTC: %.2f           \n",price_TTC(p[i].price));
+            }
+    }
+
+
+char productcode[30];//the code of the user
+int productquantity;//user quantity
 int sale_index=0;
+int oneortwo;//one or two.
 
 void buyproduct(){
+    int rightcode=0;
+     printf("\nenter the code of product: ");
+     scanf("%s",productcode);
+     printf("enter the quantity that you want: ");
+     scanf("%d",&productquantity);
     for(i=0;i<index;i++){
         int comparecode=strcmp(p[i].code,productcode);
         if(comparecode==0){
-            p[i].quantity-=productquantity;
-            time_t saledate ;
-            saledate=time(NULL);
-            st[sale_index].date=saledate;
-            //printf("date : %s\n",ctime(&st[sale_index].date));
-            st[sale_index].priceTTC=price_TTC(p[i].price);
-            st[sale_index].total_priceTTC=productquantity*price_TTC(p[i].price);
-            total_prices+=st[sale_index].total_priceTTC;
-            sold_products+=productquantity;
-            average_price=total_prices/sold_products;
-            sale_index++;
+                rightcode++;
+                if(productquantity<=p[i].quantity&&productquantity>=0){
+                        p[i].quantity-=productquantity;
+                        time_t saledate ;
+                        saledate=time(NULL);
+                        st[sale_index].date=saledate;
+                        //printf("date : %s\n",ctime(&st[sale_index].date));
+                        st[sale_index].priceTTC=price_TTC(p[i].price);
+                        st[sale_index].total_priceTTC=productquantity*price_TTC(p[i].price);
+                        total_prices+=st[sale_index].total_priceTTC;
+                        sold_products+=productquantity;
+                        average_price=total_prices/sold_products;
+                        sale_index++;
+                    }else{
+                        printf("this quantity doesn't exist,return to the MENU choose a quantity between 1 and %d.",p[i].quantity);
+                    }
 
+         }
 
-        }
     }
+    if(rightcode==0){
+        printf("this code doesn't exist choose one choice:\n");
+        printf("  1- try another code.\n");
+        printf("  2- back to the MENU.\n");
+        scanf("%d",&oneortwo);
+        if(oneortwo==1){
+            buyproduct();
+        }
+
+    }
+
 }
-int codeorquantity;
+
+int codeorquantity;//code or quantity
+
 void searchproduct(){
-    printf("1- enter the code of product.\n");
-    printf("2- enter the quantity of product.\n ");
+    printf("\n 1- enter the code.\n");
+    printf(" 2- enter the quantity.\n ");
     scanf("%d",&codeorquantity);
     if(codeorquantity==1){
+         int code_exist=0;
         printf("enter the code: ");
         scanf("%s",&productcode);
         for(i=0;i<index;i++){
@@ -83,29 +169,39 @@ void searchproduct(){
                 if(comparecode==0){
                      printf("name: %s                 ",p[i].name);
                      printf("price: %.2f                 ",p[i].price);
-                     printf("price TTC: %.2f                 ",priceTTC(p[i].price));
+                     printf("price TTC: %.2f                 ",price_TTC(p[i].price));
                      printf("quantity: %d                 ",p[i].quantity);
                      printf("code: %s                 \n\n",p[i].code);
+                     code_exist++;
                 }
     }
+    if(code_exist==0){
+        printf("there is no product has this code.");
+    }
     }else if(codeorquantity==2){
+        int quantity_exist=0;
         printf("enter the quantity: ");
         scanf("%d",&productquantity);
            for(i=0;i<index;i++){
                  if(productquantity==p[i].quantity){
                      printf("name: %s                 ",p[i].name);
                      printf("price: %.2f                 ",p[i].price);
-                     printf("price TTC: %.2f                 ",priceTTC(p[i].price));
+                     printf("price TTC: %.2f                 ",price_TTC(p[i].price));
                      printf("quantity: %d                 ",p[i].quantity);
                      printf("code: %s                 \n\n",p[i].code);
-
+                     quantity_exist++;
                 }
-    }
+        }
+        if(quantity_exist==0){
+            printf("there is no product has this quantity");
+        }
+
     }
 }
 
-int exist=0;
+
 void stockstatus(){
+         int exist=0;
          printf("\nthe products their quantity less than 3 are: \n");
          for(i=0;i<index;i++){
                 if(p[i].quantity<3){
@@ -116,14 +212,14 @@ void stockstatus(){
                      printf("code: %s                 \n\n",p[i].code);
                      exist++;
                 }
-          if(exist==0){
-            printf(" 0. ");
-          }else{}
-    }
+          }
+        if(exist==0){
+            printf("0");
+          }
 }
 
 void supplystock(){
-    printf("enter the code of product: ");
+    printf("\nenter the code of product: ");
     scanf("%s",productcode);
     printf("enter the quantity:  ");
     scanf("%d",&productquantity);
@@ -138,7 +234,7 @@ void supplystock(){
 }
 
 void deleteproduct(){
-    printf("enter the code of product: ");
+    printf("\nenter the code of product: ");
     scanf("%s",productcode);
       for(i=0;i<index-1;i++){
         int comparecode=strcmp(p[i].code,productcode);
@@ -148,9 +244,7 @@ void deleteproduct(){
                     }
             index--;
             }
-
-
-    }
+        }
     int comparecode=strcmp(p[index-1].code,productcode);
     if(comparecode==0){
             index--;
@@ -161,7 +255,7 @@ void deleteproduct(){
 float max=0;
 
 void sales_statistics(){
-    printf("the total prices of the sold products today: %.2f\n",total_prices);
+    printf("\nthe total prices of the sold products today: %.2f\n",total_prices);
     printf("the average price of the sold products: %.2f\n",average_price);
     printf("the max price of the sold products: ");
     for(i=0;i<sale_index;i++){
@@ -180,13 +274,16 @@ void sales_statistics(){
     printf("%.2f",min);
 }
 
+
+
+
 int main()
 {
 
-    printf("\n\n            |---PHARMACY MANAGEMENT---|\n\n");
+    printf("\n\n            |---PHARMACY MANAGEMENT---|\n");
 
     do{
-        printf("\n                   [--MENU--]\n\n");
+        printf("\n\n                   [--MENU--]\n\n");
         printf("1- add a new product.\n");
         printf("2- add several new products.\n");
         printf("3- sort the products.\n");
@@ -200,59 +297,17 @@ int main()
         scanf("%d",&choice);
         switch(choice){
             case 1:
-                products=1;
-             addproduct();
+                add_oneproduct();
                 break;
             case 2:
                 printf("\nhow many products do you want: ");
                 scanf("%d",&products);
-                addproduct();
-
+                add_severalproducts();
                 break;
             case 3:
-                printf("\n1-sort the list of products in ascending alphabetical order of name.\n");
-                printf("2-sort the list of products in descending order of price.\n");
-                scanf("%d",&order);
-                if(order==1){
-                    for(i=0;i<index;i++){
-                        for(j=0;j<index-1;j++){
-                            int compare=strcmp(p[j].name,p[j+1].name);
-                            if(compare>0){
-                                struct Product T=p[j];
-                                p[j]=p[j+1];
-                                p[j+1]=T;
-                            }
-
-                        }
-                    }
-
-                }
-               else if(order==2){
-                    for(i=0;i<index;i++){
-                        for(j=0;j<index-1;j++){
-
-                            if(p[j].price<p[j+1].price){
-                                struct Product T=p[j];
-                                p[j]=p[j+1];
-                                p[j+1]=T;
-                            }
-
-                        }
-                    }
-                    }
-                for(i=0;i<index;i++){
-
-                        printf("name: %s                 ",p[i].name);
-                        printf("price: %.2f                 ",p[i].price);
-                        printf("price TTC: %.2f                 \n",price_TTC(p[i].price));
-                    }
+                sortproducts();
                 break;
-            case 4://not complaited
-
-                printf("enter the code of product: ");
-                scanf("%s",productcode);
-                printf("enter the quantity that you want: ");
-                scanf("%d",&productquantity);
+            case 4:
                 buyproduct();
                 break;
             case 5:
@@ -275,8 +330,6 @@ int main()
 
     }while(choice!=0);
 
-    return 0;
+   return 0;
 }
-
-
 

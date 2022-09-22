@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1663800009 source:c:\users\hp\desktop\project -fin-sas\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+
+1663851604 source:c:\users\youcode\desktop\project -fin-sas\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+
