@@ -11,6 +11,7 @@ struct Product{
 struct Product p[10000];
 
 struct Statistics{
+    char name[50];
     time_t date;
     float priceTTC;
     float total_priceTTC;//user quantity * priceTTC
@@ -18,11 +19,22 @@ struct Statistics{
 struct Statistics st[10000];
 float total_prices=0;
 float average_price;
-int sold_products;
+int sold_products=0;//the number of the sold pieces
 
 int i,j,products;
 int choice,index=0;
 int order;
+
+int exist_code;//check if the code existed
+
+// delete product case 8
+char productcode[30];//the code of the user
+int productquantity;//user quantity
+
+//buy a product case 4
+int sale_index=0;
+int oneortwo;//one or two.
+
 
 float price_TTC(float price){
 return price+price*((float)15/(float)100);}
@@ -107,13 +119,9 @@ void sortproducts(){
     }
 
 
-char productcode[30];//the code of the user
-int productquantity;//user quantity
-int sale_index=0;
-int oneortwo;//one or two.
 
 void buyproduct(){
-    int rightcode=0;
+     exist_code=0;
      printf("\nenter the code of product: ");
      scanf("%s",productcode);
      printf("enter the quantity that you want: ");
@@ -121,9 +129,10 @@ void buyproduct(){
     for(i=0;i<index;i++){
         int comparecode=strcmp(p[i].code,productcode);
         if(comparecode==0){
-                rightcode++;
+                exist_code++;
                 if(productquantity<=p[i].quantity&&productquantity>=0){
                         p[i].quantity-=productquantity;
+                        strcpy(st[sale_index].name,p[i].name);//strcpy replace string with another string
                         time_t saledate ;
                         saledate=time(NULL);
                         st[sale_index].date=saledate;
@@ -134,14 +143,15 @@ void buyproduct(){
                         sold_products+=productquantity;
                         average_price=total_prices/sold_products;
                         sale_index++;
+                        printf("the operation was successful.");
                     }else{
-                        printf("this quantity doesn't exist,return to the MENU choose a quantity between 1 and %d.",p[i].quantity);
+                        printf("this quantity doesn't exist,return to the MENU and choose a quantity between 1 and %d.",p[i].quantity);
                     }
 
          }
 
     }
-    if(rightcode==0){
+    if(exist_code==0){
         printf("this code doesn't exist choose one choice:\n");
         printf("  1- try another code.\n");
         printf("  2- back to the MENU.\n");
@@ -234,27 +244,46 @@ void supplystock(){
 }
 
 void deleteproduct(){
+    exist_code=0;
     printf("\nenter the code of product: ");
     scanf("%s",productcode);
       for(i=0;i<index-1;i++){
         int comparecode=strcmp(p[i].code,productcode);
         if(comparecode==0){
-            while (i<index-1){
-                    p[i].quantity=p[i+1].quantity;
+            for(j=i;j<index-1;j++){
+                    strcpy(p[j].name,p[j+1].name);
+                    strcpy(p[j].code,p[j+1].code);
+                    p[j].price=p[j+1].price;
+                    p[j].quantity=p[j+1].quantity;
+
                     }
             index--;
+            exist_code++;
+            printf("the operation was successful.");
             }
         }
     int comparecode=strcmp(p[index-1].code,productcode);
     if(comparecode==0){
             index--;
+            exist_code++;
+            printf("the operation was successful.");
 
-    }else{printf("there is no product has this code.");}
+    }
+    else if(exist_code==0){
+            printf("there is no product has this code.");
+    }
 }
 
-float max=0;
+
 
 void sales_statistics(){
+    float max=0;
+    for(i=0;i<sale_index;i++){
+        printf("\nname= %s       ",st[i].name);
+        printf("total price TTC= %.2f        ",st[i].total_priceTTC);
+        printf("date : %s",ctime(&st[i].date));
+    }
+    printf("\n\n");
     printf("\nthe total prices of the sold products today: %.2f\n",total_prices);
     printf("the average price of the sold products: %.2f\n",average_price);
     printf("the max price of the sold products: ");
@@ -266,7 +295,7 @@ void sales_statistics(){
     printf("%.2f\n",max);
     float min=max;
     printf("the min price of the sold products: ");
-      for(i=0;i>=0&&i<sale_index;i++){
+      for(i=0;i<sale_index;i++){
         if(st[i].priceTTC<min){
             min=st[i].priceTTC;
         }
